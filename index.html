@@ -23,7 +23,17 @@
     </style>
 </head>
 <body class="p-4 md:p-8 no-select">
-    <div class="max-w-7xl mx-auto text-center">
+    <div class="max-w-7xl mx-auto text-center relative">
+        <!-- 방문자 카운터 -->
+        <div class="absolute top-0 right-0 flex flex-col items-end space-y-1 text-sm text-gray-300 no-copy">
+            <div class="bg-gray-800/50 px-3 py-1 rounded-lg backdrop-blur-sm">
+                <span class="text-blue-400">👥 Total:</span> <span id="total-visitors" class="font-bold text-white">0</span>
+            </div>
+            <div class="bg-gray-800/50 px-3 py-1 rounded-lg backdrop-blur-sm">
+                <span class="text-green-400">📅 Today:</span> <span id="today-visitors" class="font-bold text-white">0</span>
+            </div>
+        </div>
+        
         <h1 class="text-3xl md:text-4xl font-bold mb-2 text-white no-copy">AI 운세 로또 번호 분석기</h1>
         <p id="data-info" class="text-lg text-gray-400 mb-6 no-copy">네트워크 그래프로 보는 로또 번호의 숨은 관계</p>
 

@@ -63,3 +63,6 @@ Thumbs.db
 
 # Railway specific
 .railway/
+
+# Visitor data
+visitor-data.json

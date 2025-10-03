@@ -274,8 +274,40 @@
         return "균형 잡힌 조합입니다. 꾸준함이 당신을 성공으로 이끌 것이니, 현재의 페이스를 유지하세요.";
     }
 
+    // 방문자 카운터 함수들
+    async function _0xv1w2() {
+        try {
+            const _0xy3z4 = await fetch('/api/visitors');
+            const _0xa5b6 = await _0xy3z4.json();
+            
+            document.getElementById('total-visitors').textContent = _0xa5b6.total.toLocaleString();
+            document.getElementById('today-visitors').textContent = _0xa5b6.today.toLocaleString();
+            
+            // 로컬 스토리지에서 오늘 방문 여부 확인
+            const _0xc7d8 = localStorage.getItem('visited_today');
+            const _0xe9f0 = new Date().toDateString();
+            
+            if (_0xc7d8 !== _0xe9f0) {
+                // 오늘 첫 방문이면 카운터 증가
+                await fetch('/api/visitors/increment', { method: 'POST' });
+                localStorage.setItem('visited_today', _0xe9f0);
+                
+                // 카운터 다시 로드
+                const _0xg1h2 = await fetch('/api/visitors');
+                const _0xi3j4 = await _0xg1h2.json();
+                document.getElementById('total-visitors').textContent = _0xi3j4.total.toLocaleString();
+                document.getElementById('today-visitors').textContent = _0xi3j4.today.toLocaleString();
+            }
+        } catch (_0xk5l6) {
+            console.error('방문자 카운터 로드 실패:', _0xk5l6);
+        }
+    }
+
     // 메인 실행 함수
     async function _0xa1b2() {
+        // 방문자 카운터 초기화
+        await _0xv1w2();
+        
         const _0xc3d4 = await _0xc9d0();
         if(_0xc3d4.length === 0) {
              document.getElementById('loader').innerHTML = '<p class="text-red-400 text-xl">데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.</p>';
