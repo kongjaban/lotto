@@ -1,0 +1,21 @@
+{
+  "name": "lotto-network-analyzer",
+  "version": "1.0.0",
+  "description": "로또 번호 네트워크 분석 및 운세 추첨기",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["lotto", "network", "analysis", "fortune"],
+  "author": "Anonymous",
+  "license": "MIT"
+}
