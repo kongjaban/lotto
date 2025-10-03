@@ -103,7 +103,23 @@ app.post('/api/visitors/increment', (req, res) => {
     res.json(updatedData);
 });
 
-// 로또 데이터 프록시 API
+// 정적 로또 데이터 제공
+app.get('/api/lotto-data', (req, res) => {
+    try {
+        const dataPath = path.join(__dirname, 'lotto-data.json');
+        if (fs.existsSync(dataPath)) {
+            const data = fs.readFileSync(dataPath, 'utf8');
+            res.json(JSON.parse(data));
+        } else {
+            res.status(404).json({ error: 'Lotto data not found' });
+        }
+    } catch (error) {
+        console.error('Error reading lotto data:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// 로또 데이터 프록시 API (백업용)
 app.get('/api/lotto/:drawNumber', async (req, res) => {
     try {
         const drawNumber = req.params.drawNumber;

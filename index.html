@@ -35,7 +35,13 @@
         </div>
         
         <h1 class="text-3xl md:text-4xl font-bold mb-2 text-white no-copy">AI 운세 로또 번호 분석기</h1>
-        <p id="data-info" class="text-lg text-gray-400 mb-6 no-copy">네트워크 그래프로 보는 로또 번호의 숨은 관계</p>
+        <p id="data-info" class="text-lg text-gray-400 mb-4 no-copy">네트워크 그래프로 보는 로또 번호의 숨은 관계</p>
+        
+        <!-- 최근 당첨 번호 표시 -->
+        <div id="recent-wins" class="mb-6 space-y-3 opacity-0 transition-opacity duration-500">
+            <h3 class="text-xl font-bold text-yellow-400 mb-3 no-copy">🎯 최근 3회차 당첨 번호</h3>
+            <div id="recent-wins-list" class="space-y-2"></div>
+        </div>
 
         <div class="graph-container mb-6 protect" id="graph">
             <div id="loader" class="absolute inset-0 bg-gray-900/80 flex flex-col items-center justify-center z-50">

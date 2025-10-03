@@ -7,71 +7,73 @@
     let _0x7g8h = null;
     const _0x9i0j = d3.scaleOrdinal(d3.schemeCategory10);
 
-    // API 호출 함수들
-    async function _0xa1b2(_0xc3d4) {
-        try {
-            const _0xe5f6 = await fetch(`/api/lotto/${_0xc3d4}`);
-            if (!_0xe5f6.ok) return null;
-            const _0xk1l2 = await _0xe5f6.json();
-            if (_0xk1l2.returnValue === 'success') {
-                return {
-                    mainNumbers: [_0xk1l2.drwtNo1, _0xk1l2.drwtNo2, _0xk1l2.drwtNo3, _0xk1l2.drwtNo4, _0xk1l2.drwtNo5, _0xk1l2.drwtNo6],
-                    bonusNo: _0xk1l2.bnusNo
-                };
-            }
-            return null;
-        } catch (_0xm3n4) {
-            console.error(`Error fetching draw ${_0xc3d4}:`, _0xm3n4);
-            return null;
-        }
-    }
-
-    async function _0xo5p6() {
-        const _0xq7r8 = new Date('2002-12-07T21:00:00+0900');
-        const _0xs9t0 = new Date();
-        const _0xu1v2 = Math.floor((_0xs9t0 - _0xq7r8) / (1000 * 60 * 60 * 24 * 7));
-        let _0xw3x4 = _0xu1v2 + 1;
+    // 최근 당첨 번호 표시 함수
+    function _0xu1v2(_0xw3x4) {
+        const _0xy5z6 = document.getElementById('recent-wins-list');
+        const _0xa7b8 = _0xw3x4.slice(0, 3); // 최근 3회차만
         
-        for(let _0xy5z6 = 0; _0xy5z6 < 5; _0xy5z6++) {
-            const _0xa7b8 = await _0xa1b2(_0xw3x4 + _0xy5z6);
-            if (!_0xa7b8) return _0xw3x4 + _0xy5z6 - 1;
-        }
-        return _0xw3x4 + 4;
+        _0xy5z6.innerHTML = _0xa7b8.map(_0xc9d0 => {
+            const _0xe1f2 = _0xc9d0.mainNumbers.map(_0xg3h4 => 
+                `<div class="lotto-ball ${_0xi5j6(_0xg3h4)}">${_0xg3h4}</div>`
+            ).join('');
+            
+            const _0xk7l8 = `<div class="lotto-ball ${_0xi5j6(_0xc9d0.bonusNo)}">${_0xc9d0.bonusNo}</div>`;
+            
+            return `
+                <div class="flex items-center justify-center space-x-2 bg-gray-800/30 p-3 rounded-lg">
+                    <span class="text-white font-bold mr-3">${_0xc9d0.drawNo}회</span>
+                    <div class="flex items-center space-x-1">
+                        ${_0xe1f2}
+                    </div>
+                    <span class="text-gray-400 mx-2">+</span>
+                    ${_0xk7l8}
+                    <span class="text-gray-400 text-sm ml-2">${_0xc9d0.drawDate}</span>
+                </div>
+            `;
+        }).join('');
+        
+        document.getElementById('recent-wins').style.opacity = '1';
     }
 
+    // 정적 데이터 로드 함수
     async function _0xc9d0() {
         const _0xe1f2 = document.getElementById('loading-progress');
-        const _0xg3h4 = await _0xo5p6();
-        const _0xi5j6 = _0xg3h4 - _0x3c4d + 1;
-        const _0xo1p2 = [];
         
         try {
-            for (let _0xm9n0 = _0xg3h4; _0xm9n0 >= _0xi5j6; _0xm9n0--) {
-                try {
-                    const _0xs5t6 = await _0xa1b2(_0xm9n0);
-                    if (_0xs5t6) _0xo1p2.push(_0xs5t6);
-                    _0xe1f2.textContent = `(${_0xo1p2.length}/${_0x3c4d}) 회차 데이터 로드 완료`;
-                    
-                    // 너무 빠르게 요청하지 않도록 지연
-                    if (_0xo1p2.length % 10 === 0) {
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                    }
-                } catch (error) {
-                    console.warn(`회차 ${_0xm9n0} 로드 실패:`, error);
-                }
+            _0xe1f2.textContent = '정적 데이터 로드 중...';
+            
+            const _0xg3h4 = await fetch('/api/lotto-data');
+            if (!_0xg3h4.ok) {
+                throw new Error('데이터 로드 실패');
             }
+            
+            const _0xi5j6 = await _0xg3h4.json();
+            const _0xk7l8 = _0xi5j6.data;
+            
+            _0xe1f2.textContent = `${_0xk7l8.length}개 회차 데이터 로드 완료`;
+            
+            // 최근 당첨 번호 표시
+            _0xu1v2(_0xk7l8);
+            
+            // 데이터 형식 변환
+            const _0xm9n0 = _0xk7l8.map(_0xo1p2 => ({
+                mainNumbers: _0xo1p2.mainNumbers,
+                bonusNo: _0xo1p2.bonusNo
+            }));
+            
+            const _0xq3r4 = _0xi5j6.data[0].drawNo;
+            const _0xs5t6 = _0xi5j6.data[_0xi5j6.data.length - 1].drawNo;
+            
+            document.getElementById('data-info').textContent = `실제 데이터 (${_0xs5t6}회 ~ ${_0xq3r4}회) 분석 완료 - ${_0xm9n0.length}개 회차`;
+            
+            return _0xm9n0;
+            
         } catch (error) {
-            console.error('데이터 로드 중 오류:', error);
-            _0xe1f2.textContent = '데이터 로드 중 오류가 발생했습니다.';
-        }
-
-        if (_0xo1p2.length > 0) {
-            document.getElementById('data-info').textContent = `실제 데이터 (${_0xi5j6}회 ~ ${_0xg3h4}회) 분석 완료 - ${_0xo1p2.length}개 회차`;
-        } else {
+            console.error('정적 데이터 로드 오류:', error);
+            _0xe1f2.textContent = '데이터 로드에 실패했습니다.';
             document.getElementById('data-info').textContent = '데이터 로드에 실패했습니다.';
+            return [];
         }
-        
-        return _0xo1p2;
     }
 
     // 데이터 처리 함수들
@@ -242,6 +244,14 @@
             .attr("fill", _0xc5d6 => _0x9i0j(_0xc5d6.community));
         
         _0xe7f8(_0xi5j6, _0xs5t6);
+    }
+
+    function _0xi5j6(_0xk7l8) {
+        if (_0xk7l8 <= 10) return 'bg-yellow-400';
+        if (_0xk7l8 <= 20) return 'bg-blue-400';
+        if (_0xk7l8 <= 30) return 'bg-red-400';
+        if (_0xk7l8 <= 40) return 'bg-gray-400';
+        return 'bg-green-400';
     }
 
     function _0xg9h0(_0xi1j2) {
