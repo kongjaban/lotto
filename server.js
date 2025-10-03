@@ -103,6 +103,24 @@ app.post('/api/visitors/increment', (req, res) => {
     res.json(updatedData);
 });
 
+// 로또 데이터 프록시 API
+app.get('/api/lotto/:drawNumber', async (req, res) => {
+    try {
+        const drawNumber = req.params.drawNumber;
+        const response = await fetch(`https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=${drawNumber}`);
+        
+        if (!response.ok) {
+            return res.status(response.status).json({ error: 'Failed to fetch lotto data' });
+        }
+        
+        const data = await response.json();
+        res.json(data);
+    } catch (error) {
+        console.error('Lotto API error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // 메인 페이지
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));

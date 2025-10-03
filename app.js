@@ -9,12 +9,10 @@
 
     // API 호출 함수들
     async function _0xa1b2(_0xc3d4) {
-        const _0xe5f6 = 'https://api.allorigins.win/raw?url=';
-        const _0xg7h8 = `https://www.dhlottery.co.kr/common.do?method=getLottoNumber&drwNo=${_0xc3d4}`;
         try {
-            const _0xi9j0 = await fetch(_0xe5f6 + encodeURIComponent(_0xg7h8));
-            if (!_0xi9j0.ok) return null;
-            const _0xk1l2 = await _0xi9j0.json();
+            const _0xe5f6 = await fetch(`/api/lotto/${_0xc3d4}`);
+            if (!_0xe5f6.ok) return null;
+            const _0xk1l2 = await _0xe5f6.json();
             if (_0xk1l2.returnValue === 'success') {
                 return {
                     mainNumbers: [_0xk1l2.drwtNo1, _0xk1l2.drwtNo2, _0xk1l2.drwtNo3, _0xk1l2.drwtNo4, _0xk1l2.drwtNo5, _0xk1l2.drwtNo6],
@@ -45,20 +43,34 @@
         const _0xe1f2 = document.getElementById('loading-progress');
         const _0xg3h4 = await _0xo5p6();
         const _0xi5j6 = _0xg3h4 - _0x3c4d + 1;
-        const _0xk7l8 = [];
-        
-        for (let _0xm9n0 = _0xg3h4; _0xm9n0 >= _0xi5j6; _0xm9n0--) {
-            _0xk7l8.push(_0xa1b2(_0xm9n0));
-        }
-        
         const _0xo1p2 = [];
-        for (let _0xq3r4 = 0; _0xq3r4 < _0xk7l8.length; _0xq3r4++) {
-            const _0xs5t6 = await _0xk7l8[_0xq3r4];
-            if (_0xs5t6) _0xo1p2.push(_0xs5t6);
-            _0xe1f2.textContent = `(${_0xq3r4 + 1}/${_0xk7l8.length}) 회차 데이터 로드 완료`;
+        
+        try {
+            for (let _0xm9n0 = _0xg3h4; _0xm9n0 >= _0xi5j6; _0xm9n0--) {
+                try {
+                    const _0xs5t6 = await _0xa1b2(_0xm9n0);
+                    if (_0xs5t6) _0xo1p2.push(_0xs5t6);
+                    _0xe1f2.textContent = `(${_0xo1p2.length}/${_0x3c4d}) 회차 데이터 로드 완료`;
+                    
+                    // 너무 빠르게 요청하지 않도록 지연
+                    if (_0xo1p2.length % 10 === 0) {
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                    }
+                } catch (error) {
+                    console.warn(`회차 ${_0xm9n0} 로드 실패:`, error);
+                }
+            }
+        } catch (error) {
+            console.error('데이터 로드 중 오류:', error);
+            _0xe1f2.textContent = '데이터 로드 중 오류가 발생했습니다.';
         }
 
-        document.getElementById('data-info').textContent = `실제 데이터 (${_0xi5j6}회 ~ ${_0xg3h4}회) 분석 완료`;
+        if (_0xo1p2.length > 0) {
+            document.getElementById('data-info').textContent = `실제 데이터 (${_0xi5j6}회 ~ ${_0xg3h4}회) 분석 완료 - ${_0xo1p2.length}개 회차`;
+        } else {
+            document.getElementById('data-info').textContent = '데이터 로드에 실패했습니다.';
+        }
+        
         return _0xo1p2;
     }
 
@@ -305,34 +317,39 @@
 
     // 메인 실행 함수
     async function _0xa1b2() {
-        // 방문자 카운터 초기화
-        await _0xv1w2();
-        
-        const _0xc3d4 = await _0xc9d0();
-        if(_0xc3d4.length === 0) {
-             document.getElementById('loader').innerHTML = '<p class="text-red-400 text-xl">데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.</p>';
-            return;
+        try {
+            // 방문자 카운터 초기화
+            await _0xv1w2();
+            
+            const _0xc3d4 = await _0xc9d0();
+            if(_0xc3d4.length === 0) {
+                document.getElementById('loader').innerHTML = '<p class="text-red-400 text-xl">데이터를 불러오는 데 실패했습니다. 잠시 후 다시 시도해주세요.</p>';
+                return;
+            }
+
+            _0x7g8h = _0xu7v8(_0xc3d4);
+            _0xw5x6(_0x7g8h.nodes, _0x7g8h.links);
+            
+            const _0xe5f6 = new Map(_0x7g8h.nodes.map(_0xg7h8 => [_0xg7h8.id, 0]));
+            _0x7g8h.links.forEach(_0xi9j0 => {
+                _0xe5f6.set(_0xi9j0.source, (_0xe5f6.get(_0xi9j0.source) || 0) + _0xi9j0.weight);
+                _0xe5f6.set(_0xi9j0.target, (_0xe5f6.get(_0xi9j0.target) || 0) + _0xi9j0.weight);
+            });
+            _0x7g8h.nodes.forEach(_0xk1l2 => _0xk1l2.centrality = _0xe5f6.get(_0xk1l2.id) || 0);
+
+            _0xw1x2();
+
+            const _0xm3n4 = document.getElementById('loader');
+            _0xm3n4.style.opacity = '0';
+            setTimeout(() => _0xm3n4.style.display = 'none', 500);
+            
+            const _0xo5p6 = document.getElementById('draw-button');
+            _0xo5p6.disabled = false;
+            _0xo5p6.addEventListener('click', _0xk1l2);
+        } catch (error) {
+            console.error('애플리케이션 초기화 오류:', error);
+            document.getElementById('loader').innerHTML = '<p class="text-red-400 text-xl">애플리케이션 초기화 중 오류가 발생했습니다.</p>';
         }
-
-        _0x7g8h = _0xu7v8(_0xc3d4);
-        _0xw5x6(_0x7g8h.nodes, _0x7g8h.links);
-        
-        const _0xe5f6 = new Map(_0x7g8h.nodes.map(_0xg7h8 => [_0xg7h8.id, 0]));
-        _0x7g8h.links.forEach(_0xi9j0 => {
-            _0xe5f6.set(_0xi9j0.source, (_0xe5f6.get(_0xi9j0.source) || 0) + _0xi9j0.weight);
-            _0xe5f6.set(_0xi9j0.target, (_0xe5f6.get(_0xi9j0.target) || 0) + _0xi9j0.weight);
-        });
-        _0x7g8h.nodes.forEach(_0xk1l2 => _0xk1l2.centrality = _0xe5f6.get(_0xk1l2.id) || 0);
-
-        _0xw1x2();
-
-        const _0xm3n4 = document.getElementById('loader');
-        _0xm3n4.style.opacity = '0';
-        setTimeout(() => _0xm3n4.style.display = 'none', 500);
-        
-        const _0xo5p6 = document.getElementById('draw-button');
-        _0xo5p6.disabled = false;
-        _0xo5p6.addEventListener('click', _0xk1l2);
     }
 
     // 페이지 로드 시 실행
